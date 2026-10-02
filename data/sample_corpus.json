@@ -1,0 +1,17 @@
+[
+  {
+    "id": "doc-deepmind",
+    "title": "DeepMind and Google",
+    "text": "DeepMind was founded by Demis Hassabis in London. DeepMind developed AlphaGo. Google acquired DeepMind in 2014. Sundar Pichai is the CEO of Google. Google is a subsidiary of Alphabet. Alphabet is headquartered in Mountain View."
+  },
+  {
+    "id": "doc-openai",
+    "title": "OpenAI",
+    "text": "OpenAI was founded by Sam Altman. OpenAI developed GPT-4. Microsoft partnered with OpenAI. Microsoft is headquartered in Redmond. Satya Nadella is the CEO of Microsoft."
+  },
+  {
+    "id": "doc-anthropic",
+    "title": "Anthropic",
+    "text": "Anthropic was founded by Dario Amodei. Anthropic developed Claude. Amazon partnered with Anthropic. Amazon is headquartered in Seattle. Andy Jassy is the CEO of Amazon."
+  }
+]
