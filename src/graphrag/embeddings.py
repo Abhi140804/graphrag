@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Protocol
 
 import numpy as np
+from scipy import sparse
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -10,7 +11,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 class Embedder(Protocol):
     def fit(self, texts: list[str]) -> None: ...
 
-    def encode(self, texts: list[str]) -> np.ndarray: ...
+    def encode(self, texts: list[str]) -> np.ndarray | sparse.csr_matrix: ...
 
 
 class TfidfEmbedder:
@@ -29,11 +30,10 @@ class TfidfEmbedder:
         self._vectorizer.fit(corpus)
         self._fitted = True
 
-    def encode(self, texts: list[str]) -> np.ndarray:
+    def encode(self, texts: list[str]) -> sparse.csr_matrix:
         if not self._fitted:
             self.fit(texts)
-        matrix = self._vectorizer.transform(texts)
-        return np.asarray(matrix.toarray(), dtype=np.float32)
+        return self._vectorizer.transform(texts).astype(np.float32)
 
 
 class DenseEmbedder:
@@ -55,8 +55,10 @@ def create_embedder(model_name: str = "") -> Embedder:
     return TfidfEmbedder()
 
 
-def cosine_scores(query: np.ndarray, matrix: np.ndarray) -> np.ndarray:
-    if matrix.size == 0:
+def cosine_scores(
+    query: np.ndarray | sparse.csr_matrix, matrix: np.ndarray | sparse.csr_matrix
+) -> np.ndarray:
+    if matrix.shape[0] == 0:
         return np.array([], dtype=np.float32)
     q = query.reshape(1, -1)
     return cosine_similarity(q, matrix)[0].astype(np.float32)

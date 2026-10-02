@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import numpy as np
+from scipy import sparse
 
 from graphrag.embeddings import Embedder, cosine_scores, create_embedder
 from graphrag.models import Chunk
@@ -10,7 +11,7 @@ class VectorStore:
     def __init__(self, embedder: Embedder | None = None) -> None:
         self.embedder = embedder or create_embedder()
         self._chunks: list[Chunk] = []
-        self._matrix: np.ndarray = np.zeros((0, 0), dtype=np.float32)
+        self._matrix: np.ndarray | sparse.csr_matrix = np.zeros((0, 0), dtype=np.float32)
 
     def add(self, chunks: list[Chunk]) -> None:
         self._chunks.extend(chunks)

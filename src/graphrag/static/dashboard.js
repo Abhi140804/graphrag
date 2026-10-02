@@ -85,9 +85,42 @@ function renderQuery(result) {
   (result.seed_entities || []).forEach((n) => lastHighlight.add(n.id));
 }
 
+const MAX_DRAWN_NODES = 300;
+
+function visibleSubgraph(snapshot) {
+  const allNodes = snapshot.nodes || [];
+  const allEdges = snapshot.edges || [];
+  if (allNodes.length <= MAX_DRAWN_NODES) return { nodes: allNodes, edges: allEdges };
+
+  const keep = new Set();
+  if (lastHighlight.size) {
+    lastHighlight.forEach((id) => keep.add(id));
+    for (const e of allEdges) {
+      if (keep.size >= MAX_DRAWN_NODES) break;
+      if (lastHighlight.has(e.source_id)) keep.add(e.target_id);
+      else if (lastHighlight.has(e.target_id)) keep.add(e.source_id);
+    }
+  } else {
+    const degree = new Map();
+    allEdges.forEach((e) => {
+      degree.set(e.source_id, (degree.get(e.source_id) || 0) + 1);
+      degree.set(e.target_id, (degree.get(e.target_id) || 0) + 1);
+    });
+    [...degree.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, MAX_DRAWN_NODES)
+      .forEach(([id]) => keep.add(id));
+  }
+  return {
+    nodes: allNodes.filter((n) => keep.has(n.id)),
+    edges: allEdges.filter((e) => keep.has(e.source_id) && keep.has(e.target_id)),
+  };
+}
+
 function drawGraph(snapshot) {
+  const view = visibleSubgraph(snapshot);
   const nodes = new vis.DataSet(
-    (snapshot.nodes || []).map((n) => ({
+    view.nodes.map((n) => ({
       id: n.id,
       label: n.name,
       group: n.type,
@@ -100,7 +133,7 @@ function drawGraph(snapshot) {
     }))
   );
   const edges = new vis.DataSet(
-    (snapshot.edges || []).map((e, i) => ({
+    view.edges.map((e, i) => ({
       id: `${e.source_id}-${e.type}-${e.target_id}-${i}`,
       from: e.source_id,
       to: e.target_id,

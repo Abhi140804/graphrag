@@ -40,6 +40,23 @@ curl -s localhost:8000/ingest -H 'content-type: application/json' -d @data/sampl
 # POST {"documents":[...]} is the API shape; wrap the file or use /docs
 ```
 
+### Large dataset (Wikidata companies)
+
+`data/wikidata_companies.json` holds ~7.6k company documents (~20k facts: CEOs, founders, headquarters, parent companies, developed products) built from Wikidata. Regenerate or resize it with:
+
+```bash
+python scripts/build_wikidata_corpus.py --min-sitelinks 10   # lower = more companies
+```
+
+Load it into a running server (adds ~19k entities):
+
+```bash
+python -c "import json;print(json.dumps({'documents':json.load(open('data/wikidata_companies.json'))}))" \
+  | curl -s localhost:8000/ingest -H 'content-type: application/json' -d @-
+```
+
+Try *"Who is the CEO of the company that developed CUDA?"* or *"Where is the parent company of Google headquartered?"*. On large graphs the dashboard draws only the query's subgraph (max 300 nodes).
+
 ```python
 from graphrag import GraphRAG
 
